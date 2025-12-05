@@ -47,7 +47,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
         });
       } else if (isResizing) {
         const deltaY = e.clientY - dragStartPos.current.y;
-        const newFontSize = Math.max(minFontSize, Math.min(maxFontSize, initialConfig.current.fontSize - deltaY * 0.5));
+        const newFontSize = Math.max(minFontSize, Math.min(maxFontSize, initialConfig.current.fontSize + deltaY * 0.5));
         onChange({
           ...config,
           fontSize: Math.round(newFontSize)
