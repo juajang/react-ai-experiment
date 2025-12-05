@@ -19,7 +19,7 @@ const EditPage = () => {
       x: 10,
       y: -5
     },
-    borderStyle: 'classic'
+    borderStyle: 'border1'
   });
   
   const certRef = useRef<HTMLDivElement>(null);

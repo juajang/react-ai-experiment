@@ -5,7 +5,16 @@ export interface StampConfig {
   y: number;
 }
 
-export type BorderStyle = 'simple' | 'classic' | 'elegant' | 'ornate' | 'royal';
+export type BorderStyle = 
+  | 'border1' 
+  | 'border2' 
+  | 'border3' 
+  | 'border4' 
+  | 'border5' 
+  | 'border6' 
+  | 'border7' 
+  | 'border9' 
+  | 'border10';
 
 export interface CertificateFormData {
   number: string;
