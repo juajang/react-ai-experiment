@@ -2,18 +2,19 @@ import { forwardRef } from 'react';
 import BorderFrame from './BorderFrame';
 import Stamp from './Stamp';
 import DraggableText from './DraggableText';
-import type { CertificateFormData, StampConfig, BorderStyle, TextLayoutConfig, TextElementConfig } from '../types/certificate';
+import type { CertificateFormData, StampConfig, BorderStyle, TextLayoutConfig, TextElementConfig, CertificateField } from '../types/certificate';
 
 interface CertificatePreviewProps {
   form: CertificateFormData;
   onStampChange: (stamp: StampConfig) => void;
   onBorderStyleChange: (style: BorderStyle) => void;
   onTextLayoutChange: (field: keyof TextLayoutConfig, config: TextElementConfig) => void;
+  onFieldChange: (field: CertificateField, value: string) => void;
   isEditable?: boolean;
 }
 
 const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
-  ({ form, onStampChange, onBorderStyleChange, onTextLayoutChange, isEditable = true }, ref) => {
+  ({ form, onStampChange, onBorderStyleChange, onTextLayoutChange, onFieldChange, isEditable = true }, ref) => {
   
   const fontFamily = '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif';
 
@@ -49,6 +50,8 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         <DraggableText
           config={form.textLayout.number}
           onChange={(config) => onTextLayoutChange('number', config)}
+          text={form.number}
+          onTextChange={(text) => onFieldChange('number', text)}
           isEditable={isEditable}
           defaultFontSize={14}
           minFontSize={10}
@@ -61,14 +64,14 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${0 + form.textLayout.number.y}px`,
             transform: 'none'
           }}
-        >
-          {form.number}
-        </DraggableText>
+        />
 
         {/* 상장 제목 - 중앙 */}
         <DraggableText
           config={form.textLayout.title}
           onChange={(config) => onTextLayoutChange('title', config)}
+          text={form.title}
+          onTextChange={(text) => onFieldChange('title', text)}
           isEditable={isEditable}
           defaultFontSize={48}
           minFontSize={30}
@@ -84,14 +87,14 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${70 + form.textLayout.title.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.title}
-        </DraggableText>
+        />
 
         {/* 상 종류 - 중앙, 위아래 선 */}
         <DraggableText
           config={form.textLayout.awardTitle}
           onChange={(config) => onTextLayoutChange('awardTitle', config)}
+          text={form.awardTitle}
+          onTextChange={(text) => onFieldChange('awardTitle', text)}
           isEditable={isEditable}
           defaultFontSize={20}
           minFontSize={14}
@@ -107,14 +110,14 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${160 + form.textLayout.awardTitle.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.awardTitle}
-        </DraggableText>
+        />
 
         {/* 학년/반 */}
         <DraggableText
           config={form.textLayout.grade}
           onChange={(config) => onTextLayoutChange('grade', config)}
+          text={form.grade}
+          onTextChange={(text) => onFieldChange('grade', text)}
           isEditable={isEditable}
           defaultFontSize={18}
           minFontSize={12}
@@ -126,14 +129,14 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${270 + form.textLayout.grade.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.grade}
-        </DraggableText>
+        />
 
         {/* 이름 */}
         <DraggableText
           config={form.textLayout.name}
           onChange={(config) => onTextLayoutChange('name', config)}
+          text={form.name}
+          onTextChange={(text) => onFieldChange('name', text)}
           isEditable={isEditable}
           defaultFontSize={28}
           minFontSize={18}
@@ -146,20 +149,21 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${265 + form.textLayout.name.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.name}
-        </DraggableText>
+        />
 
         {/* 내용 */}
         <DraggableText
           config={form.textLayout.content}
           onChange={(config) => onTextLayoutChange('content', config)}
+          text={form.content}
+          onTextChange={(text) => onFieldChange('content', text)}
           isEditable={isEditable}
           defaultFontSize={16}
           minFontSize={12}
           maxFontSize={24}
           allowHorizontalResize={true}
           defaultWidth={400}
+          multiline={true}
           style={{
             color: '#333',
             fontFamily,
@@ -171,14 +175,14 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${400 + form.textLayout.content.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.content}
-        </DraggableText>
+        />
 
         {/* 날짜 */}
         <DraggableText
           config={form.textLayout.date}
           onChange={(config) => onTextLayoutChange('date', config)}
+          text={form.date}
+          onTextChange={(text) => onFieldChange('date', text)}
           isEditable={isEditable}
           defaultFontSize={16}
           minFontSize={12}
@@ -190,14 +194,14 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${550 + form.textLayout.date.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.date}
-        </DraggableText>
+        />
 
         {/* 발급자 */}
         <DraggableText
           config={form.textLayout.issuer}
           onChange={(config) => onTextLayoutChange('issuer', config)}
+          text={form.issuer}
+          onTextChange={(text) => onFieldChange('issuer', text)}
           isEditable={isEditable}
           defaultFontSize={20}
           minFontSize={14}
@@ -210,9 +214,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: `${630 + form.textLayout.issuer.y}px`,
             transform: 'translateX(-50%)'
           }}
-        >
-          {form.issuer}
-        </DraggableText>
+        />
 
         {/* 직인 */}
         <div style={{ 

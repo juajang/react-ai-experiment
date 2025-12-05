@@ -99,6 +99,7 @@ const EditPage = () => {
           onStampChange={handleStampChange}
           onBorderStyleChange={handleBorderStyleChange}
           onTextLayoutChange={handleTextLayoutChange}
+          onFieldChange={handleChange}
         />
       </PreviewContainer>
     </MainLayout>

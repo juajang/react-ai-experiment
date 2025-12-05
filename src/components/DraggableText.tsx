@@ -4,39 +4,60 @@ import type { TextElementConfig } from '../types/certificate';
 interface DraggableTextProps {
   config: TextElementConfig;
   onChange: (config: TextElementConfig) => void;
+  onTextChange?: (text: string) => void;
+  text: string;
   isEditable?: boolean;
-  children: React.ReactNode;
   defaultFontSize: number;
   minFontSize?: number;
   maxFontSize?: number;
   style?: React.CSSProperties;
   allowHorizontalResize?: boolean;
   defaultWidth?: number;
+  multiline?: boolean;
 }
 
 const DraggableText: React.FC<DraggableTextProps> = ({
   config,
   onChange,
+  onTextChange,
+  text,
   isEditable = true,
-  children,
   defaultFontSize,
   minFontSize = 10,
   maxFontSize = 80,
   style = {},
   allowHorizontalResize = false,
-  defaultWidth = 400
+  defaultWidth = 400,
+  multiline = false
 }) => {
   const [isSelected, setIsSelected] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isResizingWidth, setIsResizingWidth] = useState(false);
+  const [editText, setEditText] = useState(text);
   const elementRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const initialConfig = useRef({ x: 0, y: 0, fontSize: 0, width: 400 });
 
   useEffect(() => {
+    setEditText(text);
+  }, [text]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (elementRef.current && !elementRef.current.contains(e.target as Node)) {
+        if (isEditing) {
+          handleFinishEditing();
+        }
         setIsSelected(false);
       }
     };
@@ -82,16 +103,32 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isResizingWidth, config, onChange, minFontSize, maxFontSize]);
+  }, [isDragging, isResizing, isResizingWidth, isEditing, config, onChange, minFontSize, maxFontSize]);
+
+  const handleFinishEditing = () => {
+    setIsEditing(false);
+    if (onTextChange && editText !== text) {
+      onTextChange(editText);
+    }
+  };
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isEditable) {
+    if (isEditable && !isEditing) {
+      setIsSelected(true);
+    }
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isEditable && onTextChange) {
+      setIsEditing(true);
       setIsSelected(true);
     }
   };
 
   const handleDragStart = (e: React.MouseEvent) => {
+    if (isEditing) return;
     e.stopPropagation();
     e.preventDefault();
     setIsDragging(true);
@@ -115,6 +152,16 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, width: config.width || defaultWidth };
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !multiline) {
+      handleFinishEditing();
+    }
+    if (e.key === 'Escape') {
+      setEditText(text);
+      setIsEditing(false);
+    }
+  };
+
   const currentFontSize = config.fontSize || defaultFontSize;
   const currentWidth = config.width || defaultWidth;
 
@@ -128,17 +175,36 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     zIndex: 100
   };
 
+  const inputStyle: React.CSSProperties = {
+    fontSize: 'inherit',
+    fontFamily: 'inherit',
+    fontWeight: 'inherit',
+    color: 'inherit',
+    textAlign: 'inherit' as const,
+    lineHeight: 'inherit',
+    letterSpacing: 'inherit',
+    background: 'rgba(255,255,255,0.9)',
+    border: '2px solid #0d99ff',
+    borderRadius: '4px',
+    padding: '4px 8px',
+    outline: 'none',
+    width: '100%',
+    minWidth: '50px',
+    boxSizing: 'border-box' as const
+  };
+
   return (
     <div
       ref={elementRef}
       onClick={handleClick}
-      onMouseDown={isSelected ? handleDragStart : undefined}
+      onDoubleClick={handleDoubleClick}
+      onMouseDown={isSelected && !isEditing ? handleDragStart : undefined}
       style={{
         position: 'absolute',
         left: `calc(50% + ${config.x}px)`,
         top: `calc(50% + ${config.y}px)`,
-        cursor: isEditable ? (isSelected ? 'move' : 'pointer') : 'default',
-        userSelect: 'none',
+        cursor: isEditable ? (isEditing ? 'text' : isSelected ? 'move' : 'pointer') : 'default',
+        userSelect: isEditing ? 'text' : 'none',
         pointerEvents: 'auto',
         ...style,
         fontSize: `${currentFontSize}px`,
@@ -146,7 +212,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       }}
     >
       {/* 선택 테두리 */}
-      {isSelected && isEditable && (
+      {isSelected && isEditable && !isEditing && (
         <div
           style={{
             position: 'absolute',
@@ -162,11 +228,39 @@ const DraggableText: React.FC<DraggableTextProps> = ({
         />
       )}
 
-      {/* 콘텐츠 */}
-      {children}
+      {/* 콘텐츠 또는 편집 인풋 */}
+      {isEditing ? (
+        multiline ? (
+          <textarea
+            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onBlur={handleFinishEditing}
+            onKeyDown={handleKeyDown}
+            style={{
+              ...inputStyle,
+              resize: 'none',
+              minHeight: '80px'
+            }}
+            rows={3}
+          />
+        ) : (
+          <input
+            ref={inputRef as React.RefObject<HTMLInputElement>}
+            type="text"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            onBlur={handleFinishEditing}
+            onKeyDown={handleKeyDown}
+            style={inputStyle}
+          />
+        )
+      ) : (
+        text
+      )}
 
       {/* 리사이즈 핸들 */}
-      {isSelected && isEditable && (
+      {isSelected && isEditable && !isEditing && (
         <>
           {/* 우하단 - 글자 크기 리사이즈 */}
           <div
