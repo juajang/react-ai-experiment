@@ -11,6 +11,7 @@ interface DraggableTextProps {
   maxFontSize?: number;
   style?: React.CSSProperties;
   allowHorizontalResize?: boolean;
+  defaultWidth?: number;
 }
 
 const DraggableText: React.FC<DraggableTextProps> = ({
@@ -22,15 +23,16 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   minFontSize = 10,
   maxFontSize = 80,
   style = {},
-  allowHorizontalResize = false
+  allowHorizontalResize = false,
+  defaultWidth = 400
 }) => {
   const [isSelected, setIsSelected] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
-  const [isResizingX, setIsResizingX] = useState(false);
+  const [isResizingWidth, setIsResizingWidth] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
-  const initialConfig = useRef({ x: 0, y: 0, fontSize: 0, scaleX: 1 });
+  const initialConfig = useRef({ x: 0, y: 0, fontSize: 0, width: 400 });
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -55,12 +57,12 @@ const DraggableText: React.FC<DraggableTextProps> = ({
           ...config,
           fontSize: Math.round(newFontSize)
         });
-      } else if (isResizingX) {
+      } else if (isResizingWidth) {
         const deltaX = e.clientX - dragStartPos.current.x;
-        const newScaleX = Math.max(0.5, Math.min(2, initialConfig.current.scaleX + deltaX * 0.005));
+        const newWidth = Math.max(100, Math.min(500, initialConfig.current.width + deltaX));
         onChange({
           ...config,
-          scaleX: Math.round(newScaleX * 100) / 100
+          width: Math.round(newWidth)
         });
       }
     };
@@ -68,7 +70,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
-      setIsResizingX(false);
+      setIsResizingWidth(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -80,7 +82,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isResizingX, config, onChange, minFontSize, maxFontSize]);
+  }, [isDragging, isResizing, isResizingWidth, config, onChange, minFontSize, maxFontSize]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -94,7 +96,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     e.preventDefault();
     setIsDragging(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, scaleX: config.scaleX || 1 };
+    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, width: config.width || defaultWidth };
   };
 
   const handleResizeStart = (e: React.MouseEvent) => {
@@ -102,19 +104,19 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     e.preventDefault();
     setIsResizing(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, scaleX: config.scaleX || 1 };
+    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, width: config.width || defaultWidth };
   };
 
-  const handleResizeXStart = (e: React.MouseEvent) => {
+  const handleResizeWidthStart = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    setIsResizingX(true);
+    setIsResizingWidth(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, scaleX: config.scaleX || 1 };
+    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, width: config.width || defaultWidth };
   };
 
   const currentFontSize = config.fontSize || defaultFontSize;
-  const currentScaleX = config.scaleX || 1;
+  const currentWidth = config.width || defaultWidth;
 
   const handleStyle: React.CSSProperties = {
     position: 'absolute',
@@ -135,12 +137,12 @@ const DraggableText: React.FC<DraggableTextProps> = ({
         position: 'absolute',
         left: `calc(50% + ${config.x}px)`,
         top: `calc(50% + ${config.y}px)`,
-        transform: `translate(-50%, -50%) scaleX(${currentScaleX})`,
         cursor: isEditable ? (isSelected ? 'move' : 'pointer') : 'default',
         userSelect: 'none',
         pointerEvents: 'auto',
         ...style,
-        fontSize: `${currentFontSize}px`
+        fontSize: `${currentFontSize}px`,
+        ...(allowHorizontalResize ? { width: `${currentWidth}px` } : {})
       }}
     >
       {/* 선택 테두리 */}
@@ -166,7 +168,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       {/* 리사이즈 핸들 */}
       {isSelected && isEditable && (
         <>
-          {/* 우하단 - 세로 리사이즈 */}
+          {/* 우하단 - 글자 크기 리사이즈 */}
           <div
             onMouseDown={handleResizeStart}
             style={{
@@ -176,10 +178,10 @@ const DraggableText: React.FC<DraggableTextProps> = ({
               cursor: 'ns-resize'
             }}
           />
-          {/* 우측 중앙 - 가로 리사이즈 */}
+          {/* 우측 중앙 - 너비 리사이즈 */}
           {allowHorizontalResize && (
             <div
-              onMouseDown={handleResizeXStart}
+              onMouseDown={handleResizeWidthStart}
               style={{
                 ...handleStyle,
                 right: '-5px',

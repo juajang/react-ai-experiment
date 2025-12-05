@@ -159,11 +159,13 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           minFontSize={12}
           maxFontSize={24}
           allowHorizontalResize={true}
+          defaultWidth={400}
           style={{
             color: '#333',
             fontFamily,
             textAlign: 'center',
-            whiteSpace: 'pre',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'keep-all',
             lineHeight: '2',
             left: `calc(50% + ${form.textLayout.content.x}px)`,
             top: `${400 + form.textLayout.content.y}px`,
