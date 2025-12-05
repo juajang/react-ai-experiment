@@ -1,6 +1,5 @@
 import { useState, useRef } from 'react';
-import { CertificateForm, CertificatePreview } from '../components';
-import { MainLayout, PreviewContainer } from '../layout';
+import { CertificatePreview } from '../components';
 import type { CertificateFormData, CertificateField, StampConfig, BorderStyle, TextLayoutConfig, TextElementConfig } from '../types/certificate';
 
 // 기본 텍스트 레이아웃 설정
@@ -84,25 +83,76 @@ const EditPage = () => {
   };
 
   return (
-    <MainLayout>
-      <CertificateForm
-        form={form}
-        onChange={handleChange}
+    <div
+      style={{
+        minHeight: '100vh',
+        backgroundColor: '#f3f4f6',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 20px',
+        fontFamily: 'system-ui, sans-serif'
+      }}
+    >
+      {/* 상장 프리뷰 */}
+      <CertificatePreview 
+        ref={certRef} 
+        form={form} 
         onStampChange={handleStampChange}
-        onDownload={downloadPNG}
-        downloading={downloading}
+        onBorderStyleChange={handleBorderStyleChange}
+        onTextLayoutChange={handleTextLayoutChange}
+        onFieldChange={handleChange}
       />
-      <PreviewContainer>
-        <CertificatePreview 
-          ref={certRef} 
-          form={form} 
-          onStampChange={handleStampChange}
-          onBorderStyleChange={handleBorderStyleChange}
-          onTextLayoutChange={handleTextLayoutChange}
-          onFieldChange={handleChange}
-        />
-      </PreviewContainer>
-    </MainLayout>
+      
+      {/* 다운로드 버튼 */}
+      <button
+        onClick={downloadPNG}
+        disabled={downloading}
+        style={{
+          marginTop: '30px',
+          padding: '16px 48px',
+          fontSize: '18px',
+          fontWeight: '600',
+          color: '#fff',
+          backgroundColor: downloading ? '#9ca3af' : '#2563eb',
+          border: 'none',
+          borderRadius: '12px',
+          cursor: downloading ? 'not-allowed' : 'pointer',
+          boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)',
+          transition: 'all 0.2s',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}
+        onMouseEnter={(e) => {
+          if (!downloading) {
+            e.currentTarget.style.backgroundColor = '#1d4ed8';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!downloading) {
+            e.currentTarget.style.backgroundColor = '#2563eb';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }
+        }}
+      >
+        {downloading ? '⏳ 다운로드 중...' : '📥 PNG 다운로드'}
+      </button>
+      
+      {/* 안내 텍스트 */}
+      <p
+        style={{
+          marginTop: '20px',
+          fontSize: '14px',
+          color: '#6b7280',
+          textAlign: 'center'
+        }}
+      >
+        💡 텍스트를 <strong>더블클릭</strong>하여 수정 | <strong>드래그</strong>하여 이동 | <strong>모서리</strong>를 드래그하여 크기 조절
+      </p>
+    </div>
   );
 };
 
