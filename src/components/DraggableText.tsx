@@ -10,6 +10,7 @@ interface DraggableTextProps {
   minFontSize?: number;
   maxFontSize?: number;
   style?: React.CSSProperties;
+  allowHorizontalResize?: boolean;
 }
 
 const DraggableText: React.FC<DraggableTextProps> = ({
@@ -20,14 +21,16 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   defaultFontSize,
   minFontSize = 10,
   maxFontSize = 80,
-  style = {}
+  style = {},
+  allowHorizontalResize = false
 }) => {
   const [isSelected, setIsSelected] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isResizingX, setIsResizingX] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
-  const initialConfig = useRef({ x: 0, y: 0, fontSize: 0 });
+  const initialConfig = useRef({ x: 0, y: 0, fontSize: 0, scaleX: 1 });
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -52,12 +55,20 @@ const DraggableText: React.FC<DraggableTextProps> = ({
           ...config,
           fontSize: Math.round(newFontSize)
         });
+      } else if (isResizingX) {
+        const deltaX = e.clientX - dragStartPos.current.x;
+        const newScaleX = Math.max(0.5, Math.min(2, initialConfig.current.scaleX + deltaX * 0.005));
+        onChange({
+          ...config,
+          scaleX: Math.round(newScaleX * 100) / 100
+        });
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      setIsResizingX(false);
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -69,7 +80,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, config, onChange, minFontSize, maxFontSize]);
+  }, [isDragging, isResizing, isResizingX, config, onChange, minFontSize, maxFontSize]);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -83,7 +94,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     e.preventDefault();
     setIsDragging(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize };
+    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, scaleX: config.scaleX || 1 };
   };
 
   const handleResizeStart = (e: React.MouseEvent) => {
@@ -91,10 +102,19 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     e.preventDefault();
     setIsResizing(true);
     dragStartPos.current = { x: e.clientX, y: e.clientY };
-    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize };
+    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, scaleX: config.scaleX || 1 };
+  };
+
+  const handleResizeXStart = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsResizingX(true);
+    dragStartPos.current = { x: e.clientX, y: e.clientY };
+    initialConfig.current = { x: config.x, y: config.y, fontSize: config.fontSize, scaleX: config.scaleX || 1 };
   };
 
   const currentFontSize = config.fontSize || defaultFontSize;
+  const currentScaleX = config.scaleX || 1;
 
   const handleStyle: React.CSSProperties = {
     position: 'absolute',
@@ -115,7 +135,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
         position: 'absolute',
         left: `calc(50% + ${config.x}px)`,
         top: `calc(50% + ${config.y}px)`,
-        transform: 'translate(-50%, -50%)',
+        transform: `translate(-50%, -50%) scaleX(${currentScaleX})`,
         cursor: isEditable ? (isSelected ? 'move' : 'pointer') : 'default',
         userSelect: 'none',
         pointerEvents: 'auto',
@@ -146,15 +166,29 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       {/* 리사이즈 핸들 */}
       {isSelected && isEditable && (
         <>
+          {/* 우하단 - 세로 리사이즈 */}
           <div
             onMouseDown={handleResizeStart}
             style={{
               ...handleStyle,
               right: '-5px',
               bottom: '-5px',
-              cursor: 'nwse-resize'
+              cursor: 'ns-resize'
             }}
           />
+          {/* 우측 중앙 - 가로 리사이즈 */}
+          {allowHorizontalResize && (
+            <div
+              onMouseDown={handleResizeXStart}
+              style={{
+                ...handleStyle,
+                right: '-5px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                cursor: 'ew-resize'
+              }}
+            />
+          )}
           <div style={{ ...handleStyle, right: '-5px', top: '-5px', pointerEvents: 'none' }} />
           <div style={{ ...handleStyle, left: '-5px', bottom: '-5px', pointerEvents: 'none' }} />
           <div style={{ ...handleStyle, left: '-5px', top: '-5px', pointerEvents: 'none' }} />
@@ -165,4 +199,3 @@ const DraggableText: React.FC<DraggableTextProps> = ({
 };
 
 export default DraggableText;
-

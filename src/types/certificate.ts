@@ -9,6 +9,7 @@ export interface TextElementConfig {
   x: number;
   y: number;
   fontSize: number;
+  scaleX?: number;
 }
 
 export interface TextLayoutConfig {

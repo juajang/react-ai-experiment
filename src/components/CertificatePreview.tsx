@@ -38,67 +38,73 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
       {/* 텍스트 요소들을 배치할 영역 */}
       <div style={{ 
         position: 'absolute',
-        inset: '60px',
+        top: '55px',
+        left: '55px',
+        right: '55px',
+        bottom: '55px',
         zIndex: 10
       }}>
         
-        {/* 상장번호 */}
+        {/* 상장번호 - 왼쪽 상단 */}
         <DraggableText
           config={form.textLayout.number}
           onChange={(config) => onTextLayoutChange('number', config)}
           isEditable={isEditable}
-          defaultFontSize={12}
-          minFontSize={8}
+          defaultFontSize={14}
+          minFontSize={10}
           maxFontSize={20}
           style={{
-            color: '#666',
+            color: '#888',
             fontFamily: 'serif',
-            left: `${60 + form.textLayout.number.x}px`,
-            top: `${30 + form.textLayout.number.y}px`,
+            fontStyle: 'italic',
+            left: `${0 + form.textLayout.number.x}px`,
+            top: `${0 + form.textLayout.number.y}px`,
             transform: 'none'
           }}
         >
           {form.number}
         </DraggableText>
 
-        {/* 상장 제목 */}
+        {/* 상장 제목 - 중앙 */}
         <DraggableText
           config={form.textLayout.title}
           onChange={(config) => onTextLayoutChange('title', config)}
           isEditable={isEditable}
-          defaultFontSize={52}
+          defaultFontSize={48}
           minFontSize={30}
-          maxFontSize={80}
+          maxFontSize={70}
           style={{
             fontWeight: '700',
             color: '#1a1a1a',
             fontFamily,
-            letterSpacing: '20px',
+            letterSpacing: '40px',
+            paddingLeft: '40px',
+            whiteSpace: 'nowrap',
             left: `calc(50% + ${form.textLayout.title.x}px)`,
-            top: `${100 + form.textLayout.title.y}px`,
+            top: `${70 + form.textLayout.title.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
           {form.title}
         </DraggableText>
 
-        {/* 상 종류 */}
+        {/* 상 종류 - 중앙, 위아래 선 */}
         <DraggableText
           config={form.textLayout.awardTitle}
           onChange={(config) => onTextLayoutChange('awardTitle', config)}
           isEditable={isEditable}
-          defaultFontSize={22}
+          defaultFontSize={20}
           minFontSize={14}
-          maxFontSize={36}
+          maxFontSize={32}
           style={{
-            fontWeight: '600',
             color: '#333',
             fontFamily,
-            borderBottom: '1px solid #d4af37',
-            borderTop: '1px solid #d4af37',
-            padding: '10px 20px',
+            borderTop: '1px solid #c9a227',
+            borderBottom: '1px solid #c9a227',
+            padding: '15px 80px',
+            whiteSpace: 'nowrap',
             left: `calc(50% + ${form.textLayout.awardTitle.x}px)`,
-            top: `${180 + form.textLayout.awardTitle.y}px`,
+            top: `${160 + form.textLayout.awardTitle.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
@@ -112,12 +118,12 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           isEditable={isEditable}
           defaultFontSize={18}
           minFontSize={12}
-          maxFontSize={30}
+          maxFontSize={28}
           style={{
-            color: '#444',
+            color: '#555',
             fontFamily,
-            left: `calc(40% + ${form.textLayout.grade.x}px)`,
-            top: `${280 + form.textLayout.grade.y}px`,
+            left: `calc(35% + ${form.textLayout.grade.x}px)`,
+            top: `${270 + form.textLayout.grade.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
@@ -131,13 +137,13 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           isEditable={isEditable}
           defaultFontSize={28}
           minFontSize={18}
-          maxFontSize={50}
+          maxFontSize={44}
           style={{
             fontWeight: '700',
             color: '#1a1a1a',
             fontFamily,
             left: `calc(60% + ${form.textLayout.name.x}px)`,
-            top: `${280 + form.textLayout.name.y}px`,
+            top: `${265 + form.textLayout.name.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
@@ -151,16 +157,16 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           isEditable={isEditable}
           defaultFontSize={16}
           minFontSize={12}
-          maxFontSize={28}
+          maxFontSize={24}
+          allowHorizontalResize={true}
           style={{
             color: '#333',
             fontFamily,
             textAlign: 'center',
-            whiteSpace: 'pre-line',
-            lineHeight: '2.2',
-            maxWidth: '400px',
+            whiteSpace: 'pre',
+            lineHeight: '2',
             left: `calc(50% + ${form.textLayout.content.x}px)`,
-            top: `${420 + form.textLayout.content.y}px`,
+            top: `${400 + form.textLayout.content.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
@@ -174,12 +180,12 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           isEditable={isEditable}
           defaultFontSize={16}
           minFontSize={12}
-          maxFontSize={24}
+          maxFontSize={22}
           style={{
-            color: '#444',
+            color: '#333',
             fontFamily,
             left: `calc(50% + ${form.textLayout.date.x}px)`,
-            top: `${620 + form.textLayout.date.y}px`,
+            top: `${550 + form.textLayout.date.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
@@ -193,13 +199,13 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           isEditable={isEditable}
           defaultFontSize={20}
           minFontSize={14}
-          maxFontSize={32}
+          maxFontSize={28}
           style={{
             fontWeight: '600',
             color: '#1a1a1a',
             fontFamily,
-            left: `calc(50% + ${form.textLayout.issuer.x}px)`,
-            top: `${700 + form.textLayout.issuer.y}px`,
+            left: `calc(42% + ${form.textLayout.issuer.x}px)`,
+            top: `${630 + form.textLayout.issuer.y}px`,
             transform: 'translateX(-50%)'
           }}
         >
@@ -209,8 +215,8 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         {/* 직인 */}
         <div style={{ 
           position: 'absolute',
-          left: `calc(65% + ${form.textLayout.issuer.x}px)`,
-          top: `${680 + form.textLayout.issuer.y}px`,
+          left: `calc(58% + ${form.stamp.x}px)`,
+          top: `${620 + form.stamp.y}px`,
           pointerEvents: 'auto'
         }}>
           <Stamp stamp={form.stamp} onStampChange={onStampChange} isEditable={isEditable} />
