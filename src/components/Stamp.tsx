@@ -33,7 +33,7 @@ const Stamp: React.FC<StampProps> = ({ stamp, onStampChange, isEditable = true }
         });
       } else if (isResizing) {
         const deltaX = e.clientX - dragStartPos.current.x;
-        const newSize = Math.max(30, Math.min(150, initialStamp.current.size + deltaX));
+        const newSize = Math.max(40, Math.min(120, initialStamp.current.size + deltaX));
         onStampChange({
           ...stamp,
           size: newSize
@@ -80,10 +80,18 @@ const Stamp: React.FC<StampProps> = ({ stamp, onStampChange, isEditable = true }
     initialStamp.current = { x: stamp.x, y: stamp.y, size: stamp.size };
   };
 
-  // 폰트 크기를 도장 크기에 비례하되, 글자 수에 따라 조절
-  const textLength = stamp.text.length;
-  const baseFontSize = stamp.size * 0.3;
-  const fontSize = Math.max(8, baseFontSize / Math.max(1, Math.sqrt(textLength / 2)));
+  // 글자를 세로로 배치하기 위해 각 글자를 분리
+  const characters = stamp.text.split('');
+  const charCount = characters.length;
+  
+  // 글자 수에 따른 레이아웃 계산
+  // 2x2, 2x3 등의 그리드로 배치
+  const cols = charCount <= 2 ? 1 : charCount <= 4 ? 2 : charCount <= 6 ? 2 : 3;
+  const rows = Math.ceil(charCount / cols);
+  
+  // 폰트 크기 계산 (도장 크기와 글자 수에 따라)
+  const innerSize = stamp.size * 0.75;
+  const fontSize = Math.max(10, innerSize / Math.max(cols, rows) * 0.85);
 
   // 선택 핸들 스타일 (피그마 스타일)
   const handleStyle: React.CSSProperties = {
@@ -91,10 +99,13 @@ const Stamp: React.FC<StampProps> = ({ stamp, onStampChange, isEditable = true }
     width: '8px',
     height: '8px',
     backgroundColor: '#fff',
-    border: '1px solid #0d99ff',
-    borderRadius: '1px',
+    border: '1.5px solid #0d99ff',
+    borderRadius: '2px',
     zIndex: 2
   };
+
+  // 인장 색상
+  const stampColor = '#c23a2e';
 
   return (
     <div
@@ -110,57 +121,80 @@ const Stamp: React.FC<StampProps> = ({ stamp, onStampChange, isEditable = true }
         <div
           style={{
             position: 'absolute',
-            top: '-4px',
-            left: '-4px',
-            right: '-4px',
-            bottom: '-4px',
-            border: '1px solid #0d99ff',
-            borderRadius: '50%',
+            top: '-5px',
+            left: '-5px',
+            width: `${stamp.size + 8}px`,
+            height: `${stamp.size + 8}px`,
+            border: '1.5px solid #0d99ff',
+            borderRadius: '3px',
             pointerEvents: 'none',
-            width: `${stamp.size + 6}px`,
-            height: `${stamp.size + 6}px`,
           }}
         />
       )}
 
-      {/* 도장 본체 */}
+      {/* 도장 본체 - 사각형 인장 스타일 */}
       <div
         onClick={handleStampClick}
         onMouseDown={isSelected ? handleDragStart : undefined}
         style={{
           width: `${stamp.size}px`,
           height: `${stamp.size}px`,
-          border: `2px solid #cc3333`,
-          borderRadius: '50%',
+          border: `3px solid ${stampColor}`,
+          borderRadius: '4px',
           cursor: isEditable ? (isSelected ? 'move' : 'pointer') : 'default',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           userSelect: 'none',
-          padding: `${stamp.size * 0.1}px`,
           boxSizing: 'border-box',
-          backgroundColor: 'transparent'
+          backgroundColor: 'rgba(255, 252, 245, 0.3)',
+          position: 'relative'
         }}
       >
-        <span
+        {/* 내부 테두리 (전통 인장 스타일) */}
+        <div
           style={{
-            fontSize: `${fontSize}px`,
-            color: '#cc3333',
-            fontWeight: '700',
-            textAlign: 'center',
-            lineHeight: '1.2',
-            wordBreak: 'break-all',
-            overflowWrap: 'break-word',
-            fontFamily: '"Gungsuh", "궁서체", "Batang", serif',
-            display: 'flex',
+            position: 'absolute',
+            inset: '3px',
+            border: `1.5px solid ${stampColor}`,
+            borderRadius: '2px',
+            pointerEvents: 'none'
+          }}
+        />
+        
+        {/* 글자 영역 - 그리드 레이아웃 */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gridTemplateRows: `repeat(${rows}, 1fr)`,
+            gap: '1px',
+            width: `${innerSize}px`,
+            height: `${innerSize}px`,
             alignItems: 'center',
-            justifyContent: 'center',
-            width: '100%',
-            height: '100%'
+            justifyItems: 'center'
           }}
         >
-          {stamp.text}
-        </span>
+          {characters.map((char, index) => (
+            <span
+              key={index}
+              style={{
+                fontSize: `${fontSize}px`,
+                color: stampColor,
+                fontWeight: '900',
+                fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Gowun Batang", serif',
+                lineHeight: '1',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              {char}
+            </span>
+          ))}
+        </div>
       </div>
       
       {/* 피그마 스타일 리사이즈 핸들들 */}
@@ -171,38 +205,35 @@ const Stamp: React.FC<StampProps> = ({ stamp, onStampChange, isEditable = true }
             onMouseDown={handleResizeStart}
             style={{
               ...handleStyle,
-              right: '-4px',
-              bottom: '-4px',
+              right: '-5px',
+              bottom: '-5px',
               cursor: 'nwse-resize'
             }}
           />
-          {/* 우상단 핸들 (장식) */}
+          {/* 우상단 핸들 */}
           <div
             style={{
               ...handleStyle,
-              right: '-4px',
-              top: '-4px',
-              cursor: 'default',
+              right: '-5px',
+              top: '-5px',
               pointerEvents: 'none'
             }}
           />
-          {/* 좌하단 핸들 (장식) */}
+          {/* 좌하단 핸들 */}
           <div
             style={{
               ...handleStyle,
-              left: '-4px',
-              bottom: '-4px',
-              cursor: 'default',
+              left: '-5px',
+              bottom: '-5px',
               pointerEvents: 'none'
             }}
           />
-          {/* 좌상단 핸들 (장식) */}
+          {/* 좌상단 핸들 */}
           <div
             style={{
               ...handleStyle,
-              left: '-4px',
-              top: '-4px',
-              cursor: 'default',
+              left: '-5px',
+              top: '-5px',
               pointerEvents: 'none'
             }}
           />

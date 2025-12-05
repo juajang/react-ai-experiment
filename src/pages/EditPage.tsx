@@ -14,10 +14,10 @@ const EditPage = () => {
     date: '2021년 4월 21일',
     issuer: '중앙중학교장',
     stamp: {
-      text: '직인',
-      size: 50,
-      x: 0,
-      y: 0
+      text: '중앙중',
+      size: 60,
+      x: 10,
+      y: -5
     }
   });
   
