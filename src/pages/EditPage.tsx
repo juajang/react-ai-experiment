@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { CertificateForm, CertificatePreview } from '../components';
 import { MainLayout, PreviewContainer } from '../layout';
-import type { CertificateFormData, CertificateField } from '../types/certificate';
+import type { CertificateFormData, CertificateField, StampConfig } from '../types/certificate';
 
 const EditPage = () => {
   const [form, setForm] = useState<CertificateFormData>({
@@ -12,7 +12,13 @@ const EditPage = () => {
     name: '홍길동',
     content: '위 학생은 2021학년도 2학기 상기 과목에서\n우수한 성적을 거두었으므로\n이 상장을 수여함.',
     date: '2021년 4월 21일',
-    issuer: '중앙중학교장'
+    issuer: '중앙중학교장',
+    stamp: {
+      text: '직인',
+      size: 50,
+      x: 0,
+      y: 0
+    }
   });
   
   const certRef = useRef<HTMLDivElement>(null);
@@ -20,6 +26,10 @@ const EditPage = () => {
 
   const handleChange = (field: CertificateField, value: string) => {
     setForm(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleStampChange = (stamp: StampConfig) => {
+    setForm(prev => ({ ...prev, stamp }));
   };
 
   const downloadPNG = async () => {
@@ -50,15 +60,19 @@ const EditPage = () => {
       <CertificateForm
         form={form}
         onChange={handleChange}
+        onStampChange={handleStampChange}
         onDownload={downloadPNG}
         downloading={downloading}
       />
       <PreviewContainer>
-        <CertificatePreview ref={certRef} form={form} />
+        <CertificatePreview 
+          ref={certRef} 
+          form={form} 
+          onStampChange={handleStampChange}
+        />
       </PreviewContainer>
     </MainLayout>
   );
 };
 
 export default EditPage;
-

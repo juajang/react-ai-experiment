@@ -1,3 +1,10 @@
+export interface StampConfig {
+  text: string;
+  size: number;
+  x: number;
+  y: number;
+}
+
 export interface CertificateFormData {
   number: string;
   title: string;
@@ -7,6 +14,7 @@ export interface CertificateFormData {
   content: string;
   date: string;
   issuer: string;
+  stamp: StampConfig;
 }
 
-export type CertificateField = keyof CertificateFormData;
+export type CertificateField = keyof Omit<CertificateFormData, 'stamp'>;

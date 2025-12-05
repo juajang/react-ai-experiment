@@ -1,12 +1,16 @@
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import CornerDecoration from './CornerDecoration';
-import type { CertificateFormData } from '../types/certificate';
+import Stamp from './Stamp';
+import type { CertificateFormData, StampConfig } from '../types/certificate';
 
 interface CertificatePreviewProps {
   form: CertificateFormData;
+  onStampChange: (stamp: StampConfig) => void;
+  isEditable?: boolean;
 }
 
-const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(({ form }, ref) => {
+const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
+  ({ form, onStampChange, isEditable = true }, ref) => {
   return (
     <div
       ref={ref}
@@ -131,36 +135,22 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>((
           {form.date}
         </div>
 
-        {/* 발급자 */}
+        {/* 발급자 및 직인 */}
         <div style={{
           textAlign: 'center',
           fontSize: '20px',
           fontWeight: '600',
           color: '#1a1a1a',
-          fontFamily: '"Nanum Myeongjo", "Batang", serif'
+          fontFamily: '"Nanum Myeongjo", "Batang", serif',
+          position: 'relative',
+          height: '60px'
         }}>
-          {form.issuer}
-          {/* 직인 자리 */}
-          <div style={{
-            display: 'inline-block',
-            marginLeft: '10px',
-            width: '50px',
-            height: '50px',
-            border: '2px solid #cc3333',
-            borderRadius: '50%',
-            position: 'relative',
-            verticalAlign: 'middle'
-          }}>
-            <span style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              fontSize: '10px',
-              color: '#cc3333',
-              fontWeight: '700'
-            }}>직인</span>
-          </div>
+          <span>{form.issuer}</span>
+          <Stamp 
+            stamp={form.stamp} 
+            onStampChange={onStampChange}
+            isEditable={isEditable}
+          />
         </div>
       </div>
     </div>
@@ -170,4 +160,3 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>((
 CertificatePreview.displayName = 'CertificatePreview';
 
 export default CertificatePreview;
-
