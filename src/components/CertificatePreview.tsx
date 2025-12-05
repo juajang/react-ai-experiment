@@ -29,8 +29,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
     setSnapState(snap);
   };
 
-  const activeColor = '#0d99ff';
-  const inactiveColor = '#ddd';
+  const guideColor = '#0d99ff';
 
   return (
     <div
@@ -58,16 +57,13 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             left: '50%',
             top: '55px',
             bottom: '55px',
-            width: snapState.horizontal ? '2px' : '1px',
-            marginLeft: snapState.horizontal ? '-1px' : '-0.5px',
+            width: '0',
             borderLeft: snapState.horizontal 
-              ? `2px solid ${activeColor}` 
-              : `1px dashed ${inactiveColor}`,
-            opacity: snapState.horizontal ? 1 : 0.5,
-            boxShadow: snapState.horizontal ? `0 0 8px ${activeColor}` : 'none',
+              ? `2px dashed ${guideColor}` 
+              : `1px dashed ${guideColor}`,
+            opacity: snapState.horizontal ? 1 : 0.4,
             pointerEvents: 'none',
-            zIndex: 1000,
-            transition: 'opacity 0.1s ease-out'
+            zIndex: 1000
           }}
         />
       )}
@@ -80,16 +76,13 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             top: '50%',
             left: '55px',
             right: '55px',
-            height: snapState.vertical ? '2px' : '1px',
-            marginTop: snapState.vertical ? '-1px' : '-0.5px',
+            height: '0',
             borderTop: snapState.vertical 
-              ? `2px solid ${activeColor}` 
-              : `1px dashed ${inactiveColor}`,
-            opacity: snapState.vertical ? 1 : 0.5,
-            boxShadow: snapState.vertical ? `0 0 8px ${activeColor}` : 'none',
+              ? `2px dashed ${guideColor}` 
+              : `1px dashed ${guideColor}`,
+            opacity: snapState.vertical ? 1 : 0.4,
             pointerEvents: 'none',
-            zIndex: 1000,
-            transition: 'opacity 0.1s ease-out'
+            zIndex: 1000
           }}
         />
       )}
@@ -173,46 +166,56 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           }}
         />
 
-        {/* 학년/반 */}
-        <DraggableText
-          config={form.textLayout.grade}
-          onChange={(config) => onTextLayoutChange('grade', config)}
-          text={form.grade}
-          onTextChange={(text) => onFieldChange('grade', text)}
-          onSnapChange={handleSnapChange}
-          isEditable={isEditable}
-          defaultFontSize={18}
-          minFontSize={12}
-          maxFontSize={28}
-          style={{
-            color: '#555',
-            fontFamily,
-            left: `calc(35% + ${form.textLayout.grade.x}px)`,
-            top: `${270 + form.textLayout.grade.y}px`,
-            transform: 'translateX(-50%)'
-          }}
-        />
-
-        {/* 이름 */}
-        <DraggableText
-          config={form.textLayout.name}
-          onChange={(config) => onTextLayoutChange('name', config)}
-          text={form.name}
-          onTextChange={(text) => onFieldChange('name', text)}
-          onSnapChange={handleSnapChange}
-          isEditable={isEditable}
-          defaultFontSize={28}
-          minFontSize={18}
-          maxFontSize={44}
-          style={{
-            fontWeight: '700',
-            color: '#1a1a1a',
-            fontFamily,
-            left: `calc(60% + ${form.textLayout.name.x}px)`,
-            top: `${265 + form.textLayout.name.y}px`,
-            transform: 'translateX(-50%)'
-          }}
-        />
+        {/* 학년/반과 이름을 함께 배치 */}
+        <div style={{
+          position: 'absolute',
+          left: '50%',
+          top: `${270 + form.textLayout.grade.y}px`,
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: '20px'
+        }}>
+          <DraggableText
+            config={{ ...form.textLayout.grade, x: 0, y: 0 }}
+            onChange={(config) => onTextLayoutChange('grade', { ...config, x: form.textLayout.grade.x, y: form.textLayout.grade.y })}
+            text={form.grade}
+            onTextChange={(text) => onFieldChange('grade', text)}
+            onSnapChange={handleSnapChange}
+            isEditable={isEditable}
+            defaultFontSize={18}
+            minFontSize={12}
+            maxFontSize={28}
+            style={{
+              position: 'relative',
+              color: '#555',
+              fontFamily,
+              left: 'auto',
+              top: 'auto',
+              transform: 'none'
+            }}
+          />
+          <DraggableText
+            config={{ ...form.textLayout.name, x: 0, y: 0 }}
+            onChange={(config) => onTextLayoutChange('name', { ...config, x: form.textLayout.name.x, y: form.textLayout.name.y })}
+            text={form.name}
+            onTextChange={(text) => onFieldChange('name', text)}
+            onSnapChange={handleSnapChange}
+            isEditable={isEditable}
+            defaultFontSize={28}
+            minFontSize={18}
+            maxFontSize={44}
+            style={{
+              position: 'relative',
+              fontWeight: '700',
+              color: '#1a1a1a',
+              fontFamily,
+              left: 'auto',
+              top: 'auto',
+              transform: 'none'
+            }}
+          />
+        </div>
 
         {/* 내용 */}
         <DraggableText
@@ -261,35 +264,44 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           }}
         />
 
-        {/* 발급자 */}
-        <DraggableText
-          config={form.textLayout.issuer}
-          onChange={(config) => onTextLayoutChange('issuer', config)}
-          text={form.issuer}
-          onTextChange={(text) => onFieldChange('issuer', text)}
-          onSnapChange={handleSnapChange}
-          isEditable={isEditable}
-          defaultFontSize={20}
-          minFontSize={14}
-          maxFontSize={28}
-          style={{
-            fontWeight: '600',
-            color: '#1a1a1a',
-            fontFamily,
-            left: `calc(50% + ${form.textLayout.issuer.x}px)`,
-            top: `${630 + form.textLayout.issuer.y}px`,
-            transform: 'translateX(-50%)'
-          }}
-        />
-
-        {/* 직인 */}
-        <div style={{ 
+        {/* 발급자와 직인을 함께 배치 */}
+        <div style={{
           position: 'absolute',
-          left: `calc(70% + ${form.stamp.x}px)`,
-          top: `${620 + form.stamp.y}px`,
-          pointerEvents: 'auto'
+          left: '50%',
+          top: `${630 + form.textLayout.issuer.y}px`,
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
         }}>
-          <Stamp stamp={form.stamp} onStampChange={onStampChange} isEditable={isEditable} />
+          <DraggableText
+            config={{ ...form.textLayout.issuer, x: 0, y: 0 }}
+            onChange={(config) => onTextLayoutChange('issuer', { ...config, x: form.textLayout.issuer.x, y: form.textLayout.issuer.y })}
+            text={form.issuer}
+            onTextChange={(text) => onFieldChange('issuer', text)}
+            onSnapChange={handleSnapChange}
+            isEditable={isEditable}
+            defaultFontSize={20}
+            minFontSize={14}
+            maxFontSize={28}
+            style={{
+              position: 'relative',
+              fontWeight: '600',
+              color: '#1a1a1a',
+              fontFamily,
+              left: 'auto',
+              top: 'auto',
+              transform: 'none'
+            }}
+          />
+          <div style={{ 
+            position: 'relative',
+            left: `${form.stamp.x}px`,
+            top: `${form.stamp.y}px`,
+            pointerEvents: 'auto'
+          }}>
+            <Stamp stamp={form.stamp} onStampChange={onStampChange} isEditable={isEditable} />
+          </div>
         </div>
       </div>
     </div>
