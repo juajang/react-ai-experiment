@@ -1,6 +1,6 @@
 import React from 'react';
 import InputField from './InputField';
-import { CertificateFormData, CertificateField } from '../types/certificate';
+import type { CertificateFormData, CertificateField } from '../types/certificate';
 
 interface CertificateFormProps {
   form: CertificateFormData;

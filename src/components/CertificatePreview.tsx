@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import CornerDecoration from './CornerDecoration';
-import { CertificateFormData } from '../types/certificate';
+import type { CertificateFormData } from '../types/certificate';
 
 interface CertificatePreviewProps {
   form: CertificateFormData;
