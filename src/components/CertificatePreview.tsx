@@ -1,16 +1,17 @@
 import { forwardRef } from 'react';
-import CornerDecoration from './CornerDecoration';
+import BorderFrame from './BorderFrame';
 import Stamp from './Stamp';
-import type { CertificateFormData, StampConfig } from '../types/certificate';
+import type { CertificateFormData, StampConfig, BorderStyle } from '../types/certificate';
 
 interface CertificatePreviewProps {
   form: CertificateFormData;
   onStampChange: (stamp: StampConfig) => void;
+  onBorderStyleChange: (style: BorderStyle) => void;
   isEditable?: boolean;
 }
 
 const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
-  ({ form, onStampChange, isEditable = true }, ref) => {
+  ({ form, onStampChange, onBorderStyleChange, isEditable = true }, ref) => {
   return (
     <div
       ref={ref}
@@ -20,28 +21,16 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         backgroundColor: '#fffef5',
         position: 'relative',
         boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-        padding: '40px'
+        padding: '40px',
+        overflow: 'hidden'
       }}
     >
-      {/* 금색 테두리 프레임 */}
-      <div style={{
-        position: 'absolute',
-        inset: '20px',
-        border: '4px double #c9a227',
-        pointerEvents: 'none'
-      }} />
-      <div style={{
-        position: 'absolute',
-        inset: '30px',
-        border: '2px solid #d4af37',
-        pointerEvents: 'none'
-      }} />
-      
-      {/* 코너 장식 */}
-      <CornerDecoration position="top-left" />
-      <CornerDecoration position="top-right" />
-      <CornerDecoration position="bottom-left" />
-      <CornerDecoration position="bottom-right" />
+      {/* 테두리 프레임 */}
+      <BorderFrame 
+        style={form.borderStyle} 
+        onStyleChange={onBorderStyleChange}
+        isEditable={isEditable}
+      />
 
       {/* 상장 내용 */}
       <div style={{ 
@@ -49,7 +38,9 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         height: '100%', 
         display: 'flex', 
         flexDirection: 'column', 
-        padding: '20px' 
+        padding: '20px',
+        zIndex: 10,
+        pointerEvents: 'none'
       }}>
         
         {/* 상장 번호 */}
@@ -69,7 +60,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           fontSize: '52px',
           fontWeight: '700',
           color: '#1a1a1a',
-          fontFamily: '"Nanum Myeongjo", "Batang", serif',
+          fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif',
           letterSpacing: '20px',
           marginBottom: '30px'
         }}>
@@ -82,7 +73,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           fontSize: '22px',
           fontWeight: '600',
           color: '#333',
-          fontFamily: '"Nanum Myeongjo", "Batang", serif',
+          fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif',
           marginBottom: '40px',
           borderBottom: '1px solid #d4af37',
           borderTop: '1px solid #d4af37',
@@ -98,7 +89,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           alignItems: 'baseline',
           gap: '30px',
           marginBottom: '50px',
-          fontFamily: '"Nanum Myeongjo", "Batang", serif'
+          fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif'
         }}>
           <span style={{ fontSize: '18px', color: '#444' }}>{form.grade}</span>
           <span style={{ fontSize: '28px', fontWeight: '700', color: '#1a1a1a' }}>{form.name}</span>
@@ -115,7 +106,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             fontSize: '16px',
             lineHeight: '2.2',
             color: '#333',
-            fontFamily: '"Nanum Myeongjo", "Batang", serif',
+            fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif',
             textAlign: 'center',
             whiteSpace: 'pre-line',
             maxWidth: '400px'
@@ -129,7 +120,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           textAlign: 'center',
           fontSize: '16px',
           color: '#444',
-          fontFamily: '"Nanum Myeongjo", "Batang", serif',
+          fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif',
           marginBottom: '40px'
         }}>
           {form.date}
@@ -141,9 +132,10 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           fontSize: '20px',
           fontWeight: '600',
           color: '#1a1a1a',
-          fontFamily: '"Nanum Myeongjo", "Batang", serif',
+          fontFamily: '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif',
           position: 'relative',
-          height: '60px'
+          height: '60px',
+          pointerEvents: 'auto'
         }}>
           <span>{form.issuer}</span>
           <Stamp 

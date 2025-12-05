@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { CertificateForm, CertificatePreview } from '../components';
 import { MainLayout, PreviewContainer } from '../layout';
-import type { CertificateFormData, CertificateField, StampConfig } from '../types/certificate';
+import type { CertificateFormData, CertificateField, StampConfig, BorderStyle } from '../types/certificate';
 
 const EditPage = () => {
   const [form, setForm] = useState<CertificateFormData>({
@@ -18,7 +18,8 @@ const EditPage = () => {
       size: 60,
       x: 10,
       y: -5
-    }
+    },
+    borderStyle: 'classic'
   });
   
   const certRef = useRef<HTMLDivElement>(null);
@@ -30,6 +31,10 @@ const EditPage = () => {
 
   const handleStampChange = (stamp: StampConfig) => {
     setForm(prev => ({ ...prev, stamp }));
+  };
+
+  const handleBorderStyleChange = (borderStyle: BorderStyle) => {
+    setForm(prev => ({ ...prev, borderStyle }));
   };
 
   const downloadPNG = async () => {
@@ -69,6 +74,7 @@ const EditPage = () => {
           ref={certRef} 
           form={form} 
           onStampChange={handleStampChange}
+          onBorderStyleChange={handleBorderStyleChange}
         />
       </PreviewContainer>
     </MainLayout>

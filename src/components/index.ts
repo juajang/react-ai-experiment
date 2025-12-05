@@ -3,4 +3,5 @@ export { default as CornerDecoration } from './CornerDecoration';
 export { default as CertificateForm } from './CertificateForm';
 export { default as CertificatePreview } from './CertificatePreview';
 export { default as Stamp } from './Stamp';
+export { default as BorderFrame } from './BorderFrame';
 

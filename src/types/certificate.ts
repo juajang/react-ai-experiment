@@ -5,6 +5,8 @@ export interface StampConfig {
   y: number;
 }
 
+export type BorderStyle = 'simple' | 'classic' | 'elegant' | 'ornate' | 'royal';
+
 export interface CertificateFormData {
   number: string;
   title: string;
@@ -15,6 +17,7 @@ export interface CertificateFormData {
   date: string;
   issuer: string;
   stamp: StampConfig;
+  borderStyle: BorderStyle;
 }
 
-export type CertificateField = keyof Omit<CertificateFormData, 'stamp'>;
+export type CertificateField = keyof Omit<CertificateFormData, 'stamp' | 'borderStyle'>;
