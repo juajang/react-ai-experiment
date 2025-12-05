@@ -27,7 +27,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         backgroundColor: '#fffef5',
         position: 'relative',
         boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
-        overflow: 'hidden'
+        overflow: 'visible'
       }}
     >
       <BorderFrame 
@@ -210,7 +210,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
             fontWeight: '600',
             color: '#1a1a1a',
             fontFamily,
-            left: `calc(42% + ${form.textLayout.issuer.x}px)`,
+            left: `calc(50% + ${form.textLayout.issuer.x}px)`,
             top: `${630 + form.textLayout.issuer.y}px`,
             transform: 'translateX(-50%)'
           }}
@@ -219,7 +219,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         {/* 직인 */}
         <div style={{ 
           position: 'absolute',
-          left: `calc(58% + ${form.stamp.x}px)`,
+          left: `calc(70% + ${form.stamp.x}px)`,
           top: `${620 + form.stamp.y}px`,
           pointerEvents: 'auto'
         }}>
