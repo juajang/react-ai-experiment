@@ -1,7 +1,19 @@
 import { useState, useRef } from 'react';
 import { CertificateForm, CertificatePreview } from '../components';
 import { MainLayout, PreviewContainer } from '../layout';
-import type { CertificateFormData, CertificateField, StampConfig, BorderStyle } from '../types/certificate';
+import type { CertificateFormData, CertificateField, StampConfig, BorderStyle, TextLayoutConfig, TextElementConfig } from '../types/certificate';
+
+// 기본 텍스트 레이아웃 설정
+const defaultTextLayout: TextLayoutConfig = {
+  number: { x: 0, y: 0, fontSize: 12 },
+  title: { x: 0, y: 0, fontSize: 52 },
+  awardTitle: { x: 0, y: 0, fontSize: 22 },
+  grade: { x: 0, y: 0, fontSize: 18 },
+  name: { x: 0, y: 0, fontSize: 28 },
+  content: { x: 0, y: 0, fontSize: 16 },
+  date: { x: 0, y: 0, fontSize: 16 },
+  issuer: { x: 0, y: 0, fontSize: 20 }
+};
 
 const EditPage = () => {
   const [form, setForm] = useState<CertificateFormData>({
@@ -19,7 +31,8 @@ const EditPage = () => {
       x: 10,
       y: -5
     },
-    borderStyle: 'border1'
+    borderStyle: 'border1',
+    textLayout: defaultTextLayout
   });
   
   const certRef = useRef<HTMLDivElement>(null);
@@ -35,6 +48,16 @@ const EditPage = () => {
 
   const handleBorderStyleChange = (borderStyle: BorderStyle) => {
     setForm(prev => ({ ...prev, borderStyle }));
+  };
+
+  const handleTextLayoutChange = (field: keyof TextLayoutConfig, config: TextElementConfig) => {
+    setForm(prev => ({
+      ...prev,
+      textLayout: {
+        ...prev.textLayout,
+        [field]: config
+      }
+    }));
   };
 
   const downloadPNG = async () => {
@@ -75,6 +98,7 @@ const EditPage = () => {
           form={form} 
           onStampChange={handleStampChange}
           onBorderStyleChange={handleBorderStyleChange}
+          onTextLayoutChange={handleTextLayoutChange}
         />
       </PreviewContainer>
     </MainLayout>

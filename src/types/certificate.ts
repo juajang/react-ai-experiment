@@ -5,6 +5,23 @@ export interface StampConfig {
   y: number;
 }
 
+export interface TextElementConfig {
+  x: number;
+  y: number;
+  fontSize: number;
+}
+
+export interface TextLayoutConfig {
+  number: TextElementConfig;
+  title: TextElementConfig;
+  awardTitle: TextElementConfig;
+  grade: TextElementConfig;
+  name: TextElementConfig;
+  content: TextElementConfig;
+  date: TextElementConfig;
+  issuer: TextElementConfig;
+}
+
 export type BorderStyle = 
   | 'border1' 
   | 'border2' 
@@ -27,6 +44,8 @@ export interface CertificateFormData {
   issuer: string;
   stamp: StampConfig;
   borderStyle: BorderStyle;
+  textLayout: TextLayoutConfig;
 }
 
-export type CertificateField = keyof Omit<CertificateFormData, 'stamp' | 'borderStyle'>;
+export type CertificateField = keyof Omit<CertificateFormData, 'stamp' | 'borderStyle' | 'textLayout'>;
+export type TextLayoutField = keyof TextLayoutConfig;
