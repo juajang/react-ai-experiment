@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import BorderFrame from './BorderFrame';
 import Stamp from './Stamp';
 import DraggableText from './DraggableText';
@@ -13,10 +13,23 @@ interface CertificatePreviewProps {
   isEditable?: boolean;
 }
 
+interface SnapState {
+  horizontal: boolean;
+  vertical: boolean;
+}
+
 const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
   ({ form, onStampChange, onBorderStyleChange, onTextLayoutChange, onFieldChange, isEditable = true }, ref) => {
   
   const fontFamily = '"Noto Serif KR", "Nanum Myeongjo", "Batang", serif';
+  const [snapState, setSnapState] = useState<SnapState>({ horizontal: false, vertical: false });
+
+  const handleSnapChange = (snap: SnapState) => {
+    setSnapState(snap);
+  };
+
+  const activeColor = '#0d99ff';
+  const inactiveColor = '#ccc';
 
   return (
     <div
@@ -36,6 +49,46 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
         isEditable={isEditable}
       />
 
+      {/* 수직 중앙 보조선 */}
+      <div
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '55px',
+          bottom: '55px',
+          width: snapState.horizontal ? '2px' : '1px',
+          marginLeft: snapState.horizontal ? '-1px' : '-0.5px',
+          borderLeft: snapState.horizontal 
+            ? `2px solid ${activeColor}` 
+            : `1px dashed ${inactiveColor}`,
+          opacity: snapState.horizontal ? 1 : 0.4,
+          boxShadow: snapState.horizontal ? `0 0 8px ${activeColor}` : 'none',
+          pointerEvents: 'none',
+          zIndex: 1000,
+          transition: 'opacity 0.15s ease-out'
+        }}
+      />
+
+      {/* 수평 중앙 보조선 */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '55px',
+          right: '55px',
+          height: snapState.vertical ? '2px' : '1px',
+          marginTop: snapState.vertical ? '-1px' : '-0.5px',
+          borderTop: snapState.vertical 
+            ? `2px solid ${activeColor}` 
+            : `1px dashed ${inactiveColor}`,
+          opacity: snapState.vertical ? 1 : 0.4,
+          boxShadow: snapState.vertical ? `0 0 8px ${activeColor}` : 'none',
+          pointerEvents: 'none',
+          zIndex: 1000,
+          transition: 'opacity 0.15s ease-out'
+        }}
+      />
+
       {/* 텍스트 요소들을 배치할 영역 */}
       <div style={{ 
         position: 'absolute',
@@ -52,6 +105,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('number', config)}
           text={form.number}
           onTextChange={(text) => onFieldChange('number', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={14}
           minFontSize={10}
@@ -72,6 +126,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('title', config)}
           text={form.title}
           onTextChange={(text) => onFieldChange('title', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={48}
           minFontSize={30}
@@ -95,6 +150,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('awardTitle', config)}
           text={form.awardTitle}
           onTextChange={(text) => onFieldChange('awardTitle', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={20}
           minFontSize={14}
@@ -118,6 +174,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('grade', config)}
           text={form.grade}
           onTextChange={(text) => onFieldChange('grade', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={18}
           minFontSize={12}
@@ -137,6 +194,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('name', config)}
           text={form.name}
           onTextChange={(text) => onFieldChange('name', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={28}
           minFontSize={18}
@@ -157,6 +215,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('content', config)}
           text={form.content}
           onTextChange={(text) => onFieldChange('content', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={16}
           minFontSize={12}
@@ -183,6 +242,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('date', config)}
           text={form.date}
           onTextChange={(text) => onFieldChange('date', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={16}
           minFontSize={12}
@@ -202,6 +262,7 @@ const CertificatePreview = forwardRef<HTMLDivElement, CertificatePreviewProps>(
           onChange={(config) => onTextLayoutChange('issuer', config)}
           text={form.issuer}
           onTextChange={(text) => onFieldChange('issuer', text)}
+          onSnapChange={handleSnapChange}
           isEditable={isEditable}
           defaultFontSize={20}
           minFontSize={14}

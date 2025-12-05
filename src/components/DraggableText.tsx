@@ -1,10 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { TextElementConfig } from '../types/certificate';
 
+interface SnapState {
+  horizontal: boolean;
+  vertical: boolean;
+}
+
 interface DraggableTextProps {
   config: TextElementConfig;
   onChange: (config: TextElementConfig) => void;
   onTextChange?: (text: string) => void;
+  onSnapChange?: (snap: SnapState) => void;
   text: string;
   isEditable?: boolean;
   defaultFontSize: number;
@@ -14,12 +20,14 @@ interface DraggableTextProps {
   allowHorizontalResize?: boolean;
   defaultWidth?: number;
   multiline?: boolean;
+  snapThreshold?: number;
 }
 
 const DraggableText: React.FC<DraggableTextProps> = ({
   config,
   onChange,
   onTextChange,
+  onSnapChange,
   text,
   isEditable = true,
   defaultFontSize,
@@ -28,7 +36,8 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   style = {},
   allowHorizontalResize = false,
   defaultWidth = 400,
-  multiline = false
+  multiline = false,
+  snapThreshold = 8
 }) => {
   const [isSelected, setIsSelected] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -42,7 +51,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
 
   useEffect(() => {
     if (contentRef.current && !isEditing) {
-      // multiline일 경우 줄바꿈을 <br>로 변환
       if (multiline) {
         contentRef.current.innerHTML = text.replace(/\n/g, '<br>');
       } else {
@@ -54,7 +62,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   useEffect(() => {
     if (isEditing && contentRef.current) {
       contentRef.current.focus();
-      // 전체 선택
       const range = document.createRange();
       range.selectNodeContents(contentRef.current);
       const selection = window.getSelection();
@@ -77,10 +84,31 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       if (isDragging) {
         const deltaX = e.clientX - dragStartPos.current.x;
         const deltaY = e.clientY - dragStartPos.current.y;
+        
+        let newX = initialConfig.current.x + deltaX;
+        let newY = initialConfig.current.y + deltaY;
+        
+        // 스냅 체크 (중앙은 x=0, y는 컨테이너 중앙 기준)
+        const snapH = Math.abs(newX) < snapThreshold;
+        const snapV = Math.abs(newY) < snapThreshold;
+        
+        // 부드러운 스냅 적용
+        if (snapH) {
+          newX = 0;
+        }
+        if (snapV) {
+          newY = 0;
+        }
+        
+        // 스냅 상태 콜백
+        if (onSnapChange) {
+          onSnapChange({ horizontal: snapH, vertical: snapV });
+        }
+        
         onChange({
           ...config,
-          x: initialConfig.current.x + deltaX,
-          y: initialConfig.current.y + deltaY
+          x: newX,
+          y: newY
         });
       } else if (isResizing) {
         const deltaY = e.clientY - dragStartPos.current.y;
@@ -103,6 +131,10 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       setIsDragging(false);
       setIsResizing(false);
       setIsResizingWidth(false);
+      // 드래그 종료 시 스냅 해제
+      if (onSnapChange) {
+        onSnapChange({ horizontal: false, vertical: false });
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -114,17 +146,15 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
-  }, [isDragging, isResizing, isResizingWidth, isEditing, config, onChange, minFontSize, maxFontSize]);
+  }, [isDragging, isResizing, isResizingWidth, isEditing, config, onChange, minFontSize, maxFontSize, onSnapChange, snapThreshold]);
 
   const handleFinishEditing = () => {
     if (contentRef.current && onTextChange) {
-      // <br>을 \n으로 변환하고 HTML 태그 제거
       let newText = contentRef.current.innerHTML
         .replace(/<br\s*\/?>/gi, '\n')
         .replace(/<div>/gi, '\n')
         .replace(/<\/div>/gi, '')
         .replace(/<[^>]*>/g, '');
-      // HTML entities 디코딩
       const textarea = document.createElement('textarea');
       textarea.innerHTML = newText;
       newText = textarea.value;
@@ -178,7 +208,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
-      // 원래 텍스트로 복원
       if (contentRef.current) {
         if (multiline) {
           contentRef.current.innerHTML = text.replace(/\n/g, '<br>');
@@ -259,7 +288,7 @@ const DraggableText: React.FC<DraggableTextProps> = ({
         />
       )}
 
-      {/* 콘텐츠 - contentEditable 사용 */}
+      {/* 콘텐츠 */}
       <span
         ref={contentRef}
         contentEditable={isEditing}
@@ -277,7 +306,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
       {/* 리사이즈 핸들 */}
       {isSelected && isEditable && !isEditing && (
         <>
-          {/* 우하단 - 글자 크기 리사이즈 */}
           <div
             onMouseDown={handleResizeStart}
             style={{
@@ -287,7 +315,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
               cursor: 'ns-resize'
             }}
           />
-          {/* 우측 중앙 - 너비 리사이즈 */}
           {allowHorizontalResize && (
             <div
               onMouseDown={handleResizeWidthStart}
