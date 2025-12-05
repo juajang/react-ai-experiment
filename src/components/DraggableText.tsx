@@ -35,20 +35,31 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isResizingWidth, setIsResizingWidth] = useState(false);
-  const [editText, setEditText] = useState(text);
   const elementRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const contentRef = useRef<HTMLSpanElement>(null);
   const dragStartPos = useRef({ x: 0, y: 0 });
   const initialConfig = useRef({ x: 0, y: 0, fontSize: 0, width: 400 });
 
   useEffect(() => {
-    setEditText(text);
-  }, [text]);
+    if (contentRef.current && !isEditing) {
+      // multiline일 경우 줄바꿈을 <br>로 변환
+      if (multiline) {
+        contentRef.current.innerHTML = text.replace(/\n/g, '<br>');
+      } else {
+        contentRef.current.textContent = text;
+      }
+    }
+  }, [text, isEditing, multiline]);
 
   useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
+    if (isEditing && contentRef.current) {
+      contentRef.current.focus();
+      // 전체 선택
+      const range = document.createRange();
+      range.selectNodeContents(contentRef.current);
+      const selection = window.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
     }
   }, [isEditing]);
 
@@ -106,10 +117,23 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   }, [isDragging, isResizing, isResizingWidth, isEditing, config, onChange, minFontSize, maxFontSize]);
 
   const handleFinishEditing = () => {
-    setIsEditing(false);
-    if (onTextChange && editText !== text) {
-      onTextChange(editText);
+    if (contentRef.current && onTextChange) {
+      // <br>을 \n으로 변환하고 HTML 태그 제거
+      let newText = contentRef.current.innerHTML
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<div>/gi, '\n')
+        .replace(/<\/div>/gi, '')
+        .replace(/<[^>]*>/g, '');
+      // HTML entities 디코딩
+      const textarea = document.createElement('textarea');
+      textarea.innerHTML = newText;
+      newText = textarea.value;
+      
+      if (newText !== text) {
+        onTextChange(newText);
+      }
     }
+    setIsEditing(false);
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -153,12 +177,20 @@ const DraggableText: React.FC<DraggableTextProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !multiline) {
-      handleFinishEditing();
-    }
     if (e.key === 'Escape') {
-      setEditText(text);
+      // 원래 텍스트로 복원
+      if (contentRef.current) {
+        if (multiline) {
+          contentRef.current.innerHTML = text.replace(/\n/g, '<br>');
+        } else {
+          contentRef.current.textContent = text;
+        }
+      }
       setIsEditing(false);
+    }
+    if (e.key === 'Enter' && !multiline) {
+      e.preventDefault();
+      handleFinishEditing();
     }
   };
 
@@ -173,24 +205,6 @@ const DraggableText: React.FC<DraggableTextProps> = ({
     border: '1.5px solid #0d99ff',
     borderRadius: '2px',
     zIndex: 100
-  };
-
-  const inputStyle: React.CSSProperties = {
-    fontSize: 'inherit',
-    fontFamily: 'inherit',
-    fontWeight: 'inherit',
-    color: 'inherit',
-    textAlign: 'inherit' as const,
-    lineHeight: 'inherit',
-    letterSpacing: 'inherit',
-    background: 'rgba(255,255,255,0.9)',
-    border: '2px solid #0d99ff',
-    borderRadius: '4px',
-    padding: '4px 8px',
-    outline: 'none',
-    width: '100%',
-    minWidth: '50px',
-    boxSizing: 'border-box' as const
   };
 
   return (
@@ -228,36 +242,37 @@ const DraggableText: React.FC<DraggableTextProps> = ({
         />
       )}
 
-      {/* 콘텐츠 또는 편집 인풋 */}
-      {isEditing ? (
-        multiline ? (
-          <textarea
-            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-            onBlur={handleFinishEditing}
-            onKeyDown={handleKeyDown}
-            style={{
-              ...inputStyle,
-              resize: 'none',
-              minHeight: '80px'
-            }}
-            rows={3}
-          />
-        ) : (
-          <input
-            ref={inputRef as React.RefObject<HTMLInputElement>}
-            type="text"
-            value={editText}
-            onChange={(e) => setEditText(e.target.value)}
-            onBlur={handleFinishEditing}
-            onKeyDown={handleKeyDown}
-            style={inputStyle}
-          />
-        )
-      ) : (
-        text
+      {/* 편집 중 테두리 */}
+      {isEditing && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '-4px',
+            left: '-4px',
+            right: '-4px',
+            bottom: '-4px',
+            border: '2px solid #0d99ff',
+            borderRadius: '3px',
+            pointerEvents: 'none',
+            zIndex: 99
+          }}
+        />
       )}
+
+      {/* 콘텐츠 - contentEditable 사용 */}
+      <span
+        ref={contentRef}
+        contentEditable={isEditing}
+        suppressContentEditableWarning
+        onKeyDown={handleKeyDown}
+        onBlur={isEditing ? handleFinishEditing : undefined}
+        style={{
+          outline: 'none',
+          display: 'block',
+          minWidth: '10px',
+          minHeight: '1em'
+        }}
+      />
 
       {/* 리사이즈 핸들 */}
       {isSelected && isEditable && !isEditing && (
